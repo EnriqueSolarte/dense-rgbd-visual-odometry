@@ -5,7 +5,7 @@ exp_folder = 'examples';
 K = dlmread(fullfile(exp_folder, 'kinect_params.txt'));
 
 % load (image, depth) pairs and ground truth relative pose
-case_folder = 'case_2';
+case_folder = 'case_4';
 
 %% load previous image and depth pairs
 img_prev = im2double(imread(fullfile(exp_folder, case_folder, 'img_prev.png')));
@@ -31,9 +31,14 @@ gt_pose_rel = getRelativePose(gt_pose_curr, gt_pose_prev);
 
 %% warping by the ground-truth relative pose
 [warped_image, valid_mask] = warpImage(img_curr, dep_prev, gt_pose_rel, K);
+
 error = mean((warped_image(valid_mask) - img_prev(valid_mask)).^2);
 disp(error);
 
+figure(1);
+imshow(warped_image)
+figure(2);
+imshow(img_prev)
 figure(3);
 imshow(abs(warped_image - img_prev) .* valid_mask, [])
 
@@ -42,3 +47,5 @@ num_levels = 5;
 isVerbose = true;
 
 [pose_rel, score] = estimateVisualOdometry(img_curr, img_prev, dep_prev, K, num_levels, isVerbose);
+pose_rel
+gt_pose_rel

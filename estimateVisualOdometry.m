@@ -31,12 +31,21 @@ increment = zeros(6, 1);
 increment = twistexp(increment);
 pose_rel = increment * pose_rel;
 
+[warped_image, valid_mask] = warpImage(img_curr, dep_prev, pose_rel, K);
+figure(1);
+imshow(img_prev)
+figure(2);
+imshow(warped_image)
+figure(3)
+imshow(((warped_image - img_prev).^2).*valid_mask, [])
+
 % modify the camera parameters to fit each pyramid
 K_pyr = K;
 K_pyr(1:2, :) = K_pyr(1:2, :) / (2^(num_levels-1));
 
+% [pcl, valid_mask] = reprojectDepthImage(dep_prev, K);
 for n = num_levels:-1:1
-    
+%     n=1;
     % image size
     [height, width] = size(dep_prev_pyr{n});
     
@@ -90,9 +99,10 @@ for n = num_levels:-1:1
         [warped_image, valid_mask] = warpImage(img_curr, dep_prev, pose_rel, K);
         error = mean((warped_image(valid_mask) - img_prev(valid_mask)).^2);
         disp(['visual consistency score in level ' num2str(n) ' is ' num2str(error)]);
-        
-        figure(1);
-        imshow(abs(warped_image - img_prev).*valid_mask, [])
+        figure(4);
+        imshow(((warped_image - img_prev).^2).*valid_mask, [])
+        figure(5)
+        imshow(warped_image)        
     end
     
     % increse the focal length
